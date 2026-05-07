@@ -2,9 +2,9 @@ name: Python QA Automation Pipeline
 
 on:
   push:
-    branches: [ main ] # Runs every time you push to main
+    branches: [ main ]
   pull_request:
-    branches: [ main ] # Runs on every PR
+    branches: [ main ]
 
 jobs:
   automation-tests:
@@ -18,13 +18,23 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Install Ollama (Runner Side)
+        run: |
+          curl -fsSL https://ollama.com | sh
+          ollama serve & 
+          # Give it time to initialize
+          sleep 10 
+          # Pre-pull the lightweight model for your tests
+          ollama pull tinyllama:latest
+
       - name: Install Dependencies
         run: |
-          pip install pytest requests playwright
-          python -m playwright install chromium
+          pip install pytest requests pytest-playwright
+          # Install browser binaries and system-level dependencies
+          python -m playwright install --with-deps chromium
 
-      - name: Execute Cloud & Playwright Tests
+      - name: Execute Automation Tests
         env:
-          # This pulls the secret we saved in Step 1
           OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
-        run: pytest -s -v
+        # Added --color=yes to make CI logs easier to read
+        run: pytest -s -v --color=yes
