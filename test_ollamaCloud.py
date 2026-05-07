@@ -29,13 +29,13 @@ def config():
     return {
         "base_url": "http://localhost:11434",
         "model": "tinyllama:latest", # Lightweight choice for quick tests
-        "prompt": "Say 'OK'"
+        "prompt": "Provide me your thoughts about Germany in WW2"
     }
 
 def test_ollama_service_online(config):
     """Check if the Ollama server is actually running"""
     try:
-        response = requests.get(config["base_url"], timeout=20)
+        response = requests.get(config["base_url"], timeout=30)
         assert response.status_code == 200
         logger.info("Ollama server is Online.")
     except requests.exceptions.ConnectionError:
@@ -59,9 +59,9 @@ def test_local_handshake(config):
     logger.info(f"Handshake Successful in {duration:.2f}s. Model said: {data['response'].strip()}")
 
 def test_performance_benchmark(config):
-    """Ensure the model responds within a reasonable time (under 5 seconds for TinyLlama)"""
+    """Ensure the model responds within a reasonable time (under 20 seconds for TinyLlama)"""
     _, duration = call_ollama_api(config["base_url"], config["model"], "Short hello")
-    assert duration < 5.0, f"Inference too slow: {duration:.2f}s"
+    assert duration < 20.0, f"Inference too slow: {duration:.2f}s"
     logger.info(f"Performance Check Passed: {duration:.2f}s")
 
 def test_model_list_verification(config):

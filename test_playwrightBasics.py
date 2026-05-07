@@ -22,7 +22,7 @@ For CSS selector derived from ID and Classname for that locator:
 def test_coreLocators(playwright):
 
     
-    browser = playwright.chromium.launch(headless=False)
+    browser = playwright.chromium.launch(headless=True)
     context = browser.new_context()
     page = context.new_page()
     page.goto("https://rahulshettyacademy.com/loginpagePractise")

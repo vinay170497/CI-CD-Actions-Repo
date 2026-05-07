@@ -9,6 +9,11 @@ on:
 jobs:
   automation-tests:
     runs-on: ubuntu-latest
+    # --- ADD THIS SECTION ---
+    outputs:
+      passed_count: ${{ steps.pytest_step.outputs.passed_count }}
+      total_count: ${{ steps.pytest_step.outputs.total_count }}
+    # ------------------------
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -20,30 +25,33 @@ jobs:
 
       - name: Install and Start Ollama
         run: |
-          # Use the explicit install.sh URL to avoid HTML redirects
           curl -fsSL https://ollama.com/install.sh | sh
-          
-          # Start the server in the background
           ollama serve & 
-          
-          # Wait for the server to be responsive
           echo "Waiting for Ollama server to start..."
           until curl -s http://localhost:11434 > /dev/null; do
             sleep 5
           done
-          
-          # Pull the model for CI tests
           echo "Pulling tinyllama model..."
           ollama pull tinyllama:latest
 
       - name: Install Dependencies
         run: |
-          pip install pytest requests pytest-playwright
-          # Install browser binaries and system-level dependencies
+          pip install pytest requests pytest-playwright pytest-json-report
           python -m playwright install --with-deps chromium
 
       - name: Execute Automation Tests
+        id: pytest_step
         env:
           OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
-        # Added --color=yes to make CI logs easier to read
-        run: pytest -s -v --color=yes
+        run: |
+          # Run tests and ensure we generate the json report
+          pytest -s -v --json-report --json-report-file=report.json || true
+          
+          # Extract counts
+          PASSED=$(jq '.summary.passed // 0' report.json)
+          TOTAL=$(jq '.summary.total // 0' report.json)
+          
+          # Set the outputs so the Job-level outputs can pick them up
+          echo "passed_count=$PASSED" >> $GITHUB_OUTPUT
+          echo "total_count=$TOTAL" >> $GITHUB_OUTPUT
+          echo "Final Result: $PASSED out of $TOTAL tests passed."

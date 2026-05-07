@@ -1,0 +1,33 @@
+name: Conditional Trigger Logic
+
+on:
+  workflow_run:
+    workflows: ["Python QA Automation Pipeline"]
+    types: [completed]
+
+jobs:
+  check-results:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Analyze Results and Route
+        run: |
+          # DUMMY LOGIC FOR DEMO
+          # In a real scenario, you'd fetch the output from the previous run
+          # For this dummy test, we will simulate the logic based on your rules:
+          
+          PASSED_COUNT=5 # Replace with dynamic logic if needed
+          TOTAL_COUNT=7
+
+          if [ "$PASSED_COUNT" -eq "$TOTAL_COUNT" ]; then
+            echo "STATUS: ALL PASS. Triggering ALL further workflows..."
+            # Trigger downstream logic here
+          
+          elif [ "$PASSED_COUNT" -ge 5 ]; then
+            echo "STATUS: PARTIAL PASS ($PASSED_COUNT/$TOTAL_COUNT)."
+            echo "Triggering only safe workflows (skipping failed modules)..."
+          
+          else
+            echo "STATUS: FAILURE ($PASSED_COUNT tests passed). Minimum threshold (5) not met."
+            echo "Stopping all further triggers."
+            exit 1
+          fi
