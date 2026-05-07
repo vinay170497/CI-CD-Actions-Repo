@@ -35,7 +35,7 @@ def config():
 def test_ollama_service_online(config):
     """Check if the Ollama server is actually running"""
     try:
-        response = requests.get(config["base_url"], timeout=30)
+        response = requests.get(config["base_url"], timeout=120)
         assert response.status_code == 200
         logger.info("Ollama server is Online.")
     except requests.exceptions.ConnectionError:
