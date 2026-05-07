@@ -1,0 +1,1 @@
+This is a basic practice project for a beginner who is learning github actions and triggers based on push requests on diff branches and forks
