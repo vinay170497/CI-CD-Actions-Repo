@@ -55,3 +55,9 @@ jobs:
           echo "passed_count=$PASSED" >> $GITHUB_OUTPUT
           echo "total_count=$TOTAL" >> $GITHUB_OUTPUT
           echo "Final Result: $PASSED out of $TOTAL tests passed."
+
+- name: Upload test report
+  uses: actions/upload-artifact@v4
+  with:
+    name: pytest-report
+    path: report.json
